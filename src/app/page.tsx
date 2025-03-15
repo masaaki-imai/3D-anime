@@ -275,7 +275,7 @@ const ThreeScene = forwardRef<ThreeSceneHandle, ThreeSceneProps>((props, ref) =>
 
     // Controls setup
     const controls = new OrbitControls(camera, renderer.domElement);
-    controls.target.set(0, 1.2, 0);
+    controls.target.set(0, 1.82, 0.1);
     controls.update();
     controlsRef.current = controls;
 
@@ -483,7 +483,7 @@ const PictureInPictureVideo: React.FC<PiPVideoProps> = ({ isVisible, videoSrc, o
   if (!isVisible) return null;
 
   return (
-    <div className="fixed bottom-5 right-5 z-20 w-64 md:w-80 shadow-xl rounded-lg overflow-hidden">
+    <div className="fixed bottom-5 right-5 z-20 w-48 md:w-64 lg:w-80 shadow-xl rounded-lg overflow-hidden">
       <div className="relative bg-black">
         <button
           onClick={onClose}
@@ -695,6 +695,7 @@ const Home = () => {
   const loadStartTime = useRef<number>(Date.now());
   const isFirstLoad = useRef<boolean>(true);
   const videoPreloadRef = useRef<HTMLVideoElement | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // ページロード時にビデオを事前にロード
   useEffect(() => {
@@ -713,10 +714,17 @@ const Home = () => {
   // Animation function
   const handleIntergalactiaDance = () => {
     if (threeSceneRef.current) {
-      // 最初にビデオ表示を設定してからダンスアニメーションを開始
       setShowVideo(true);
 
-      // 少し遅延させてダンスアニメーションを開始（ビデオの初期化時間を考慮）
+      // 音楽を最初から再生
+      if (!audioRef.current) {
+        audioRef.current = new Audio(MODEL_PATHS.DANCE_MUSIC);
+        audioRef.current.loop = true;
+      }
+      audioRef.current.play().catch(error => {
+        console.warn('Failed to play music:', error);
+      });
+
       setTimeout(() => {
         threeSceneRef.current!.playDanceAnimation(0);
       }, 50);
@@ -726,6 +734,15 @@ const Home = () => {
   // ビデオを閉じる関数
   const handleCloseVideo = () => {
     setShowVideo(false);
+
+    // 動画を閉じた時に音楽を再生
+    if (!audioRef.current) {
+      audioRef.current = new Audio(MODEL_PATHS.DANCE_MUSIC);
+      audioRef.current.loop = true;
+    }
+    audioRef.current.play().catch(error => {
+      console.warn('Failed to play music:', error);
+    });
   };
 
   // Model load state handler
