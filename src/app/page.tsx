@@ -31,7 +31,8 @@ export interface ThreeSceneHandle {
 const MODEL_PATHS = {
   CHARACTER: '/3d/kawaii22.glb',  // Main character model
   DANCE_MOTION: '/3d/motion.glb',  // Dance motion
-  DANCE_MUSIC: '/3d/idle.mp3'     // Dance BGM
+  DANCE_MUSIC: '/3d/idle.mp3',     // Dance BGM
+  ORIGINAL_VIDEO: '/3d/original_movie.mp4' // オリジナルビデオ
 } as const;
 
 // ThreeScene component property type definition
@@ -379,14 +380,14 @@ const ThreeScene = forwardRef<ThreeSceneHandle, ThreeSceneProps>((props, ref) =>
         currentActionRef.current.stop();
       }
 
-      // Music playback
-      if (!audioRef.current) {
-        audioRef.current = new Audio(MODEL_PATHS.DANCE_MUSIC);
-        audioRef.current.loop = true;
-      }
-      audioRef.current.play().catch(error => {
-        console.warn('Failed to play music:', error);
-      });
+      // Music playback - 削除：ビデオの音声と重複するため無効化
+      // if (!audioRef.current) {
+      //   audioRef.current = new Audio(MODEL_PATHS.DANCE_MUSIC);
+      //   audioRef.current.loop = true;
+      // }
+      // audioRef.current.play().catch(error => {
+      //   console.warn('Failed to play music:', error);
+      // });
 
       // Play specified dance animation
       const animationName = `dance_${index}`;
@@ -414,6 +415,149 @@ const ThreeScene = forwardRef<ThreeSceneHandle, ThreeSceneProps>((props, ref) =>
 
 ThreeScene.displayName = 'ThreeScene';
 
+// VideoOverlay component
+interface VideoOverlayProps {
+  isVisible: boolean;
+  videoSrc: string;
+  onClose: () => void;
+}
+
+const VideoOverlay: React.FC<VideoOverlayProps> = ({ isVisible, videoSrc, onClose }) => {
+  if (!isVisible) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
+      <div className="relative max-w-5xl w-full">
+        <button
+          onClick={onClose}
+          className="absolute -top-10 right-0 text-white text-2xl hover:text-red-500"
+        >
+          ✕
+        </button>
+        <video
+          controls
+          autoPlay
+          className="w-full rounded-lg shadow-2xl"
+        >
+          <source src={videoSrc} type="video/mp4" />
+          お使いのブラウザはビデオタグをサポートしていません。
+        </video>
+      </div>
+    </div>
+  );
+};
+
+// PictureInPictureVideo component
+interface PiPVideoProps {
+  isVisible: boolean;
+  videoSrc: string;
+  onClose: () => void;
+}
+
+const PictureInPictureVideo: React.FC<PiPVideoProps> = ({ isVisible, videoSrc, onClose }) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // ビデオが表示/非表示になったときの処理
+  useEffect(() => {
+    if (isVisible && videoRef.current) {
+      // ビデオが表示されたら再生を確実に開始
+      const playVideo = async () => {
+        try {
+          // 先にビデオをロードしておく
+          videoRef.current!.load();
+          // 少し待ってから再生開始 (ダンスアニメーションとの同期を改善)
+          await new Promise(resolve => setTimeout(resolve, 100));
+          await videoRef.current!.play();
+        } catch (error) {
+          console.warn('Failed to play video:', error);
+        }
+      };
+
+      playVideo();
+    } else if (!isVisible && videoRef.current) {
+      // 非表示になったら一時停止
+      videoRef.current.pause();
+    }
+  }, [isVisible]);
+
+  if (!isVisible) return null;
+
+  return (
+    <div className="fixed bottom-5 right-5 z-20 w-64 md:w-80 shadow-xl rounded-lg overflow-hidden">
+      <div className="relative bg-black">
+        <button
+          onClick={onClose}
+          className="absolute top-2 right-2 text-white text-xl bg-black/50 rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-500/80 z-10"
+        >
+          ✕
+        </button>
+        <video
+          ref={videoRef}
+          controls
+          autoPlay
+          loop
+          className="w-full"
+          preload="auto"
+          playsInline
+        >
+          <source src={videoSrc} type="video/mp4" />
+          お使いのブラウザはビデオタグをサポートしていません。
+        </video>
+      </div>
+    </div>
+  );
+};
+
+// Credits modal component
+interface CreditsModalProps {
+  isVisible: boolean;
+  onClose: () => void;
+}
+
+const CreditsModal: React.FC<CreditsModalProps> = ({ isVisible, onClose }) => {
+  if (!isVisible) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
+      <div className="relative bg-gray-900 p-8 rounded-lg max-w-2xl w-full mx-4">
+        <button
+          onClick={onClose}
+          className="absolute -top-10 right-0 text-white text-2xl hover:text-red-500"
+        >
+          ✕
+        </button>
+        <h2 className="text-2xl font-bold text-white mb-6">Credits</h2>
+        <div className="space-y-4 text-gray-200">
+          <div>
+            <h3 className="text-xl font-semibold mb-2">Dance Motion Reference</h3>
+            <p>三桜じゅり【じゅりんぐる】</p>
+            <a
+              href="https://www.youtube.com/shorts/gYZzVHGrRcA"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-400 hover:text-blue-300"
+            >
+              YouTube Short
+            </a>
+          </div>
+          <div>
+            <h3 className="text-xl font-semibold mb-2">Character Model</h3>
+            <p>Created using VRoid Studio</p>
+            <a
+              href="https://vroid.com/en/studio"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-400 hover:text-blue-300"
+            >
+              VRoid Studio Website
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // Controls component
 interface ControlsProps {
   onIntergalactiaDance: () => void;
@@ -426,6 +570,8 @@ const Controls: React.FC<ControlsProps> = ({
   isModelLoaded,
   githubUrl = "https://github.com"
 }) => {
+  const [showCredits, setShowCredits] = useState(false);
+
   // Common button class
   const buttonClass = `
     px-5 py-2.5
@@ -450,37 +596,65 @@ const Controls: React.FC<ControlsProps> = ({
   };
 
   return (
-    <div className="absolute bottom-5 left-5 bg-black/70 p-4 rounded-lg text-white backdrop-blur-md shadow-lg z-10 flex flex-wrap gap-3 md:flex-row">
-      <button
-        onClick={onIntergalactiaDance}
-        disabled={!isModelLoaded}
-        className={`${buttonClass} bg-green-600 hover:bg-green-700 focus:ring-green-500`}
-      >
-        Dance Motion
-      </button>
-
-      <button
-        onClick={handleReset}
-        className={`${buttonClass} bg-gray-600 hover:bg-gray-700 focus:ring-gray-500`}
-      >
-        Reset
-      </button>
-
-      <button
-        onClick={handleGithub}
-        className={`${buttonClass} bg-purple-600 hover:bg-purple-700 focus:ring-purple-500 flex items-center justify-center gap-2`}
-      >
-        <svg
-          className="w-5 h-5"
-          viewBox="0 0 24 24"
-          fill="currentColor"
-          xmlns="http://www.w3.org/2000/svg"
+    <>
+      <div className="absolute bottom-5 left-5 bg-black/70 p-4 rounded-lg text-white backdrop-blur-md shadow-lg z-10 flex flex-wrap gap-3 md:flex-row">
+        <button
+          onClick={onIntergalactiaDance}
+          disabled={!isModelLoaded}
+          className={`${buttonClass} bg-green-600 hover:bg-green-700 focus:ring-green-500`}
         >
-          <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.2 11.38.6.12.83-.26.83-.57v-2c-3.34.73-4.03-1.6-4.03-1.6-.55-1.4-1.34-1.77-1.34-1.77-1.08-.74.08-.73.08-.73 1.2.08 1.83 1.23 1.83 1.23 1.07 1.84 2.8 1.3 3.5 1 .1-.78.42-1.3.76-1.6-2.67-.3-5.47-1.34-5.47-5.93 0-1.3.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 016 0c2.28-1.55 3.3-1.23 3.3-1.23.64 1.66.24 2.88.12 3.18.76.84 1.23 1.9 1.23 3.22 0 4.6-2.8 5.63-5.48 5.92.42.36.8 1.1.8 2.2v3.3c0 .3.2.7.82.57C20.56 21.8 24 17.3 24 12c0-6.63-5.37-12-12-12z"/>
-        </svg>
-        GitHub
-      </button>
-    </div>
+          Dance Motion
+        </button>
+
+        <button
+          onClick={handleReset}
+          className={`${buttonClass} bg-gray-600 hover:bg-gray-700 focus:ring-gray-500`}
+        >
+          Reset
+        </button>
+
+        <button
+          onClick={handleGithub}
+          className={`${buttonClass} bg-purple-600 hover:bg-purple-700 focus:ring-purple-500 flex items-center justify-center gap-2`}
+        >
+          <svg
+            className="w-5 h-5"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.2 11.38.6.12.83-.26.83-.57v-2c-3.34.73-4.03-1.6-4.03-1.6-.55-1.4-1.34-1.77-1.34-1.77-1.08-.74.08-.73.08-.73 1.2.08 1.83 1.23 1.83 1.23 1.07 1.84 2.8 1.3 3.5 1 .1-.78.42-1.3.76-1.6-2.67-.3-5.47-1.34-5.47-5.93 0-1.3.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 016 0c2.28-1.55 3.3-1.23 3.3-1.23.64 1.66.24 2.88.12 3.18.76.84 1.23 1.9 1.23 3.22 0 4.6-2.8 5.63-5.48 5.92.42.36.8 1.1.8 2.2v3.3c0 .3.2.7.82.57C20.56 21.8 24 17.3 24 12c0-6.63-5.37-12-12-12z"/>
+          </svg>
+          GitHub
+        </button>
+
+        <button
+          onClick={() => setShowCredits(true)}
+          className={`${buttonClass} bg-blue-600 hover:bg-blue-700 focus:ring-blue-500 flex items-center justify-center gap-2`}
+        >
+          <svg
+            className="w-5 h-5"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+          Credits
+        </button>
+      </div>
+
+      <CreditsModal
+        isVisible={showCredits}
+        onClose={() => setShowCredits(false)}
+      />
+    </>
   );
 };
 
@@ -516,15 +690,42 @@ const Home = () => {
   const [isModelLoaded, setIsModelLoaded] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [loadingStatus, setLoadingStatus] = useState('Loading...');
+  const [showVideo, setShowVideo] = useState(false);
   const threeSceneRef = useRef<ThreeSceneHandle>(null);
   const loadStartTime = useRef<number>(Date.now());
   const isFirstLoad = useRef<boolean>(true);
+  const videoPreloadRef = useRef<HTMLVideoElement | null>(null);
+
+  // ページロード時にビデオを事前にロード
+  useEffect(() => {
+    // ビデオを事前にロードしておく
+    videoPreloadRef.current = new Audio(MODEL_PATHS.ORIGINAL_VIDEO) as unknown as HTMLVideoElement;
+    videoPreloadRef.current.preload = 'auto';
+    videoPreloadRef.current.load();
+
+    return () => {
+      if (videoPreloadRef.current) {
+        videoPreloadRef.current.src = '';
+      }
+    };
+  }, []);
 
   // Animation function
   const handleIntergalactiaDance = () => {
     if (threeSceneRef.current) {
-      threeSceneRef.current.playDanceAnimation(0);
+      // 最初にビデオ表示を設定してからダンスアニメーションを開始
+      setShowVideo(true);
+
+      // 少し遅延させてダンスアニメーションを開始（ビデオの初期化時間を考慮）
+      setTimeout(() => {
+        threeSceneRef.current!.playDanceAnimation(0);
+      }, 50);
     }
+  };
+
+  // ビデオを閉じる関数
+  const handleCloseVideo = () => {
+    setShowVideo(false);
   };
 
   // Model load state handler
@@ -618,6 +819,12 @@ const Home = () => {
           onModelLoaded={handleModelLoad}
         />
       </div>
+
+      <PictureInPictureVideo
+        isVisible={showVideo}
+        videoSrc={MODEL_PATHS.ORIGINAL_VIDEO}
+        onClose={handleCloseVideo}
+      />
     </div>
   );
 };

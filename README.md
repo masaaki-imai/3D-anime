@@ -83,3 +83,22 @@ The following model files are required:
 - Animations may not work correctly depending on the internal structure of GLB models
 - Requires a browser that supports WebGL
 - Performance depends on the device being used
+
+
+# How to create?
+Youtubeの動画をダウンロードできればなんでもいいですが、自分はcobaltというサービスを利用しました
+https://cobalt.tools/
+
+あとはモーションを作ってくれるSaasのdeepemotionにサインアップします
+deepemotion Signup
+https://www.deepmotion.com/
+
+動画をveedで編集して
+- 20秒以内
+- FPS(Frames Per Second) 30
+を用意
+
+https://www.veed.io
+
+anime character
+https://vroid.com/en/studio
