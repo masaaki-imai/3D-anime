@@ -1,36 +1,95 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Kawaii 3Dモデルデモ - Next.js版
 
-## Getting Started
+このプロジェクトはKawaii 3Dモデル（GLB形式）をWebブラウザで表示・操作するWebアプリケーションです。Next.jsとTypeScriptを使用して、3Dモデルを表示し、アニメーションを適用することができます。
 
-First, run the development server:
+## 機能
+
+- Kawaii GLBモデルの表示と操作
+- 内蔵アニメーションの再生（存在する場合）
+- カスタムアニメーション機能（ダンス、手を振るなど）
+- カメラコントロール（ドラッグでモデルの周りを回転、スクロールでズーム）
+- レスポンシブデザイン対応
+
+## 使用技術
+
+- Next.js - Reactフレームワーク
+- TypeScript - 型安全なJavaScript
+- Three.js - 3Dグラフィックスレンダリング
+- GLTFLoader - GLBファイルのロードとアニメーション
+
+## 開発環境のセットアップ
+
+1. 依存関係をインストール
+
+```bash
+npm install
+```
+
+2. 開発サーバーを起動
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+3. ブラウザで http://localhost:3000 を開く
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## ビルドと本番環境向けデプロイ
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. プロジェクトをビルド
 
-## Learn More
+```bash
+npm run build
+```
 
-To learn more about Next.js, take a look at the following resources:
+2. 本番環境向けにサーバーを起動
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm run start
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## モデルファイル
 
-## Deploy on Vercel
+以下のモデルファイルが必要です：
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- `/public/3d/kawaii22.glb` - メインの3Dモデル
+- `/public/3d/motion.glb` - アニメーション用3Dモデル
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## プロジェクト構造
+
+```
+3d-app/
+├── public/               # 静的ファイル
+│   └── 3d/              # 3Dモデルファイル
+│       ├── kawaii22.glb # メインの3Dモデル
+│       └── motion.glb # アニメーション用3Dモデル
+├── src/                 # ソースコード
+│   ├── components/      # Reactコンポーネント
+│   │   ├── Controls.tsx # コントロールパネル
+│   │   ├── ErrorNotice.tsx # エラー通知
+│   │   └── ThreeScene.tsx # Three.jsシーン
+│   ├── pages/           # Next.jsページ
+│   │   ├── _app.tsx     # アプリケーションコンポーネント
+│   │   └── index.tsx    # ホームページ
+│   └── styles/          # スタイルシート
+│       ├── Controls.module.css
+│       ├── ErrorNotice.module.css
+│       └── globals.css  # グローバルスタイル
+├── next.config.js       # Next.js設定
+├── package.json         # 依存関係
+└── tsconfig.json        # TypeScript設定
+```
+
+## 使用方法
+
+1. ページを開くと、Kawaii 3Dモデルが表示されます
+2. 「シンプルダンス」ボタンをクリックすると、ダンスアニメーションが開始されます
+3. 「手を振る」ボタンをクリックすると、手を振るアニメーションが実行されます
+4. 「基本アニメーション」ボタンをクリックすると、モデル内蔵アニメーションが再生されます
+5. 「ダンスモーション」ボタンをクリックすると、外部モデルのアニメーションが適用されます
+6. 「リセット」ボタンをクリックすると、モデルが初期ポーズに戻ります
+
+## 注意事項
+
+- GLBモデルの内部構造によっては、アニメーションが正常に動作しない場合があります
+- WebGLをサポートしているブラウザが必要です
+- パフォーマンスは使用しているデバイスに依存します
