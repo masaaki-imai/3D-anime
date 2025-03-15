@@ -418,11 +418,13 @@ ThreeScene.displayName = 'ThreeScene';
 interface ControlsProps {
   onIntergalactiaDance: () => void;
   isModelLoaded: boolean;
+  githubUrl?: string;
 }
 
 const Controls: React.FC<ControlsProps> = ({
   onIntergalactiaDance,
-  isModelLoaded
+  isModelLoaded,
+  githubUrl = "https://github.com"
 }) => {
   // Common button class
   const buttonClass = `
@@ -443,6 +445,10 @@ const Controls: React.FC<ControlsProps> = ({
     window.location.reload();
   };
 
+  const handleGithub = () => {
+    window.open(githubUrl, '_blank');
+  };
+
   return (
     <div className="absolute bottom-5 left-5 bg-black/70 p-4 rounded-lg text-white backdrop-blur-md shadow-lg z-10 flex flex-wrap gap-3 md:flex-row">
       <button
@@ -458,6 +464,21 @@ const Controls: React.FC<ControlsProps> = ({
         className={`${buttonClass} bg-gray-600 hover:bg-gray-700 focus:ring-gray-500`}
       >
         Reset
+      </button>
+
+      <button
+        onClick={handleGithub}
+        className={`${buttonClass} bg-purple-600 hover:bg-purple-700 focus:ring-purple-500 flex items-center justify-center gap-2`}
+      >
+        <svg
+          className="w-5 h-5"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.2 11.38.6.12.83-.26.83-.57v-2c-3.34.73-4.03-1.6-4.03-1.6-.55-1.4-1.34-1.77-1.34-1.77-1.08-.74.08-.73.08-.73 1.2.08 1.83 1.23 1.83 1.23 1.07 1.84 2.8 1.3 3.5 1 .1-.78.42-1.3.76-1.6-2.67-.3-5.47-1.34-5.47-5.93 0-1.3.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 016 0c2.28-1.55 3.3-1.23 3.3-1.23.64 1.66.24 2.88.12 3.18.76.84 1.23 1.9 1.23 3.22 0 4.6-2.8 5.63-5.48 5.92.42.36.8 1.1.8 2.2v3.3c0 .3.2.7.82.57C20.56 21.8 24 17.3 24 12c0-6.63-5.37-12-12-12z"/>
+        </svg>
+        GitHub
       </button>
     </div>
   );
@@ -585,6 +606,7 @@ const Home = () => {
       <Controls
         onIntergalactiaDance={handleIntergalactiaDance}
         isModelLoaded={isModelLoaded}
+        githubUrl="https://github.com/masaaki-imai/3D-anime/blob/main/src/app/page.tsx"
       />
 
       <div
