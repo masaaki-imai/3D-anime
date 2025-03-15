@@ -526,10 +526,10 @@ const CreditsModal: React.FC<CreditsModalProps> = ({ isVisible, onClose }) => {
         >
           ✕
         </button>
-        <h2 className="text-2xl font-bold text-white mb-6">Credits</h2>
-        <div className="space-y-4 text-gray-200">
+        <h2 className="text-2xl font-bold mb-4 text-white">Credits</h2>
+        <div className="text-gray-300 space-y-4">
           <div>
-            <h3 className="text-xl font-semibold mb-2">Dance Motion Reference</h3>
+            <h3 className="text-xl font-semibold mb-2">Dance Motion</h3>
             <p>三桜じゅり【じゅりんぐる】</p>
             <a
               href="https://www.youtube.com/shorts/gYZzVHGrRcA"
@@ -537,11 +537,23 @@ const CreditsModal: React.FC<CreditsModalProps> = ({ isVisible, onClose }) => {
               rel="noopener noreferrer"
               className="text-blue-400 hover:text-blue-300"
             >
-              YouTube Short
+              Dance Reference Video
             </a>
           </div>
           <div>
-            <h3 className="text-xl font-semibold mb-2">Character Model</h3>
+            <h3 className="text-xl font-semibold mb-2">Music</h3>
+            <p>YOASOBI「アイドル」 Official Music</p>
+            <a
+              href="https://www.youtube.com/watch?v=ZRtdQ81jPUQ"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-400 hover:text-blue-300"
+            >
+              YouTube Video
+            </a>
+          </div>
+          <div>
+            <h3 className="text-xl font-semibold mb-2">Anime Character</h3>
             <p>Created using VRoid Studio</p>
             <a
               href="https://vroid.com/en/studio"
