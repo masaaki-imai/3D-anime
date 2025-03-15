@@ -1,95 +1,85 @@
-# Kawaii 3Dモデルデモ - Next.js版
+# 3D Model Demo - Next.js Version
 
-このプロジェクトはKawaii 3Dモデル（GLB形式）をWebブラウザで表示・操作するWebアプリケーションです。Next.jsとTypeScriptを使用して、3Dモデルを表示し、アニメーションを適用することができます。
+This project is a web application that displays and manipulates 3D models (GLB format) in a web browser. Built with Next.js and TypeScript, it allows you to view 3D models and apply animations.
 
-## 機能
+## Features
 
-- Kawaii GLBモデルの表示と操作
-- 内蔵アニメーションの再生（存在する場合）
-- カスタムアニメーション機能（ダンス、手を振るなど）
-- カメラコントロール（ドラッグでモデルの周りを回転、スクロールでズーム）
-- レスポンシブデザイン対応
+- Display and control 3D GLB models
+- Play built-in animations (if available)
+- Custom animation features (dance, etc.)
+- Camera controls (drag to rotate around model, scroll to zoom)
+- Responsive design support
 
-## 使用技術
+## Technologies Used
 
-- Next.js - Reactフレームワーク
-- TypeScript - 型安全なJavaScript
-- Three.js - 3Dグラフィックスレンダリング
-- GLTFLoader - GLBファイルのロードとアニメーション
+- Next.js - React framework
+- TypeScript - Type-safe JavaScript
+- Three.js - 3D graphics rendering
+- GLTFLoader - GLB file loading and animation
 
-## 開発環境のセットアップ
+## Development Environment Setup
 
-1. 依存関係をインストール
+1. Install dependencies
 
 ```bash
 npm install
 ```
 
-2. 開発サーバーを起動
+2. Start development server
 
 ```bash
 npm run dev
 ```
 
-3. ブラウザで http://localhost:3000 を開く
+3. Open http://localhost:3000 in your browser
 
-## ビルドと本番環境向けデプロイ
+## Build and Production Deployment
 
-1. プロジェクトをビルド
+1. Build the project
 
 ```bash
 npm run build
 ```
 
-2. 本番環境向けにサーバーを起動
+2. Start production server
 
 ```bash
 npm run start
 ```
 
-## モデルファイル
+## Model Files
 
-以下のモデルファイルが必要です：
+The following model files are required:
 
-- `/public/3d/kawaii22.glb` - メインの3Dモデル
-- `/public/3d/motion.glb` - アニメーション用3Dモデル
+- `/public/3d/kawaii22.glb` - Main 3D model
+- `/public/3d/motion.glb` - Animation model
 
-## プロジェクト構造
+## Project Structure
 
 ```
 3d-app/
-├── public/               # 静的ファイル
-│   └── 3d/              # 3Dモデルファイル
-│       ├── kawaii22.glb # メインの3Dモデル
-│       └── motion.glb # アニメーション用3Dモデル
-├── src/                 # ソースコード
-│   ├── components/      # Reactコンポーネント
-│   │   ├── Controls.tsx # コントロールパネル
-│   │   ├── ErrorNotice.tsx # エラー通知
-│   │   └── ThreeScene.tsx # Three.jsシーン
-│   ├── pages/           # Next.jsページ
-│   │   ├── _app.tsx     # アプリケーションコンポーネント
-│   │   └── index.tsx    # ホームページ
-│   └── styles/          # スタイルシート
-│       ├── Controls.module.css
-│       ├── ErrorNotice.module.css
-│       └── globals.css  # グローバルスタイル
-├── next.config.js       # Next.js設定
-├── package.json         # 依存関係
-└── tsconfig.json        # TypeScript設定
+├── public/               # Static files
+│   └── 3d/              # 3D model files
+│       ├── kawaii22.glb # Main 3D model
+│       └── motion.glb   # Animation model
+├── src/                 # Source code
+│   ├── app/            # Next.js app directory
+│   │   └── page.tsx    # Main page component
+│   └── styles/         # Stylesheets
+│       └── globals.css # Global styles
+├── next.config.js      # Next.js configuration
+├── package.json        # Dependencies
+└── tsconfig.json      # TypeScript configuration
 ```
 
-## 使用方法
+## Usage
 
-1. ページを開くと、Kawaii 3Dモデルが表示されます
-2. 「シンプルダンス」ボタンをクリックすると、ダンスアニメーションが開始されます
-3. 「手を振る」ボタンをクリックすると、手を振るアニメーションが実行されます
-4. 「基本アニメーション」ボタンをクリックすると、モデル内蔵アニメーションが再生されます
-5. 「ダンスモーション」ボタンをクリックすると、外部モデルのアニメーションが適用されます
-6. 「リセット」ボタンをクリックすると、モデルが初期ポーズに戻ります
+1. Open the page to view the 3D model
+2. Click "Dance Motion" button to start dance animation
+3. Click "Reset" button to return the model to its initial pose
 
-## 注意事項
+## Notes
 
-- GLBモデルの内部構造によっては、アニメーションが正常に動作しない場合があります
-- WebGLをサポートしているブラウザが必要です
-- パフォーマンスは使用しているデバイスに依存します
+- Animations may not work correctly depending on the internal structure of GLB models
+- Requires a browser that supports WebGL
+- Performance depends on the device being used

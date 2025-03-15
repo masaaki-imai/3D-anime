@@ -5,14 +5,14 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
-// 型定義を拡張（THREE.Object3DにisBoneプロパティを追加）
+// Type extension (adding isBone property to THREE.Object3D)
 declare module 'three' {
   interface Object3D {
     isBone?: boolean;
   }
 }
 
-// 型定義
+// Type definitions
 interface ModelData {
   scene: THREE.Group;
   animations: THREE.AnimationClip[];
@@ -22,26 +22,26 @@ interface Actions {
   [key: string]: THREE.AnimationAction;
 }
 
-// ThreeSceneコンポーネントのハンドル型定義
+// ThreeScene component handle type definition
 export interface ThreeSceneHandle {
   playDanceAnimation: (index: number) => void;
 }
 
-// モデルとモーションのパス定数
+// Model and motion path constants
 const MODEL_PATHS = {
-  CHARACTER: '/3d/kawaii22.glb',  // メインキャラクターモデル
-  DANCE_MOTION: '/3d/motion.glb',  // ダンスモーション
-  DANCE_MUSIC: '/3d/idle.mp3'     // ダンス用BGM
+  CHARACTER: '/3d/kawaii22.glb',  // Main character model
+  DANCE_MOTION: '/3d/motion.glb',  // Dance motion
+  DANCE_MUSIC: '/3d/idle.mp3'     // Dance BGM
 } as const;
 
-// ThreeSceneコンポーネントのプロパティ型定義
+// ThreeScene component property type definition
 interface ThreeSceneProps {
   onModelLoaded: (loaded: boolean, error?: string) => void;
 }
 
-// ボーン名のマッピングテーブル
+// Bone name mapping table
 const boneMapping: { [key: string]: string } = {
-  // motionのボーン名: kawaiiのボーン名
+  // motion bone name: kawaii bone name
   'hips_JNT': 'J_Bip_C_Hips',
   'spine_JNT': 'J_Bip_C_Spine',
   'spine1_JNT': 'J_Bip_C_Chest',
@@ -49,31 +49,31 @@ const boneMapping: { [key: string]: string } = {
   'neck_JNT': 'J_Bip_C_Neck',
   'head_JNT': 'J_Bip_C_Head',
 
-  // 左腕
+  // Left arm
   'l_shoulder_JNT': 'J_Bip_L_Shoulder',
   'l_arm_JNT': 'J_Bip_L_UpperArm',
   'l_forearm_JNT': 'J_Bip_L_LowerArm',
   'l_hand_JNT': 'J_Bip_L_Hand',
 
-  // 右腕
+  // Right arm
   'r_shoulder_JNT': 'J_Bip_R_Shoulder',
   'r_arm_JNT': 'J_Bip_R_UpperArm',
   'r_forearm_JNT': 'J_Bip_R_LowerArm',
   'r_hand_JNT': 'J_Bip_R_Hand',
 
-  // 左脚
+  // Left leg
   'l_upleg_JNT': 'J_Bip_L_UpperLeg',
   'l_leg_JNT': 'J_Bip_L_LowerLeg',
   'l_foot_JNT': 'J_Bip_L_Foot',
   'l_toebase_JNT': 'J_Bip_L_ToeBase',
 
-  // 右脚
+  // Right leg
   'r_upleg_JNT': 'J_Bip_R_UpperLeg',
   'r_leg_JNT': 'J_Bip_R_LowerLeg',
   'r_foot_JNT': 'J_Bip_R_Foot',
   'r_toebase_JNT': 'J_Bip_R_ToeBase',
 
-  // 指（左手）
+  // Finger (Left hand)
   'l_handThumb1_JNT': 'J_Bip_L_Thumb1',
   'l_handThumb2_JNT': 'J_Bip_L_Thumb2',
   'l_handThumb3_JNT': 'J_Bip_L_Thumb3',
@@ -90,7 +90,7 @@ const boneMapping: { [key: string]: string } = {
   'l_handPinky2_JNT': 'J_Bip_L_Little2',
   'l_handPinky3_JNT': 'J_Bip_L_Little3',
 
-  // 指（右手）
+  // Finger (Right hand)
   'r_handThumb1_JNT': 'J_Bip_R_Thumb1',
   'r_handThumb2_JNT': 'J_Bip_R_Thumb2',
   'r_handThumb3_JNT': 'J_Bip_R_Thumb3',
@@ -108,15 +108,15 @@ const boneMapping: { [key: string]: string } = {
   'r_handPinky3_JNT': 'J_Bip_R_Little3'
 };
 
-// モデルの重複読み込み防止フラグ - モジュールレベルで保持
+// Model load duplicate prevention flag - maintained at module level
 let isLoading = false;
 
-// ThreeSceneコンポーネント
+// ThreeScene component
 const ThreeScene = forwardRef<ThreeSceneHandle, ThreeSceneProps>((props, ref) => {
   const mountRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // アニメーション関連の状態
+  // Animation-related state
   const animationRef = useRef<number>(0);
   const sceneRef = useRef<THREE.Scene | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
@@ -131,11 +131,11 @@ const ThreeScene = forwardRef<ThreeSceneHandle, ThreeSceneProps>((props, ref) =>
   const danceAnimationsRef = useRef<THREE.AnimationClip[]>([]);
   const isComponentMounted = useRef(false);
 
-  // GLBモデルのパス
+  // GLB model paths
   const modelPath = MODEL_PATHS.CHARACTER;
   const dancePath = MODEL_PATHS.DANCE_MOTION;
 
-  // アニメーションのリターゲット（骨格構造が異なる場合）
+  // Animation retargeting (for when bone structures are different)
   const retargetAnimation = (clip: THREE.AnimationClip): THREE.AnimationClip => {
     const newClip = THREE.AnimationClip.parse(THREE.AnimationClip.toJSON(clip));
     const newTracks: THREE.KeyframeTrack[] = [];
@@ -155,10 +155,10 @@ const ThreeScene = forwardRef<ThreeSceneHandle, ThreeSceneProps>((props, ref) =>
     return new THREE.AnimationClip(clip.name, clip.duration, newTracks);
   };
 
-  // 外部アニメーションを処理する関数
+  // Function to process external animations
   const processExternalAnimations = () => {
     if (!danceAnimationsRef.current.length || !modelRef.current || !mixerRef.current) {
-      console.warn('アニメーションの処理に必要なデータが不足しています');
+      console.warn('Missing data required for animation processing');
       return;
     }
 
@@ -169,11 +169,11 @@ const ThreeScene = forwardRef<ThreeSceneHandle, ThreeSceneProps>((props, ref) =>
         actionsRef.current[`dance_${index}`] = action;
       });
     } catch (error) {
-      console.error('外部アニメーションの処理に失敗しました:', error);
+      console.error('Failed to process external animations:', error);
     }
   };
 
-  // モデルを読み込む関数
+  // Function to load models
   const loadModels = async () => {
     if (isLoading) return;
     isLoading = true;
@@ -181,23 +181,23 @@ const ThreeScene = forwardRef<ThreeSceneHandle, ThreeSceneProps>((props, ref) =>
     try {
       const loader = new GLTFLoader();
 
-      // メインモデルを読み込む
+      // Load main model
       const characterGltf = await loader.loadAsync(modelPath);
       modelRef.current = characterGltf.scene;
 
-      // モデルを適切にスケールと位置を調整
+      // Adjust model scale and position
       modelRef.current.scale.set(1.5, 1.5, 1.5);
       modelRef.current.position.set(0, 0, 0);
 
-      // モデルをシーンに追加
+      // Add model to scene
       if (sceneRef.current) {
         sceneRef.current.add(modelRef.current);
       }
 
-      // アニメーションミキサーの設定
+      // Set up animation mixer
       mixerRef.current = new THREE.AnimationMixer(modelRef.current);
 
-      // 元のモデルのアニメーションをセットアップ
+      // Set up original model animations
       if (characterGltf.animations && characterGltf.animations.length > 0) {
         characterGltf.animations.forEach((clip, index) => {
           const action = mixerRef.current!.clipAction(clip);
@@ -205,43 +205,43 @@ const ThreeScene = forwardRef<ThreeSceneHandle, ThreeSceneProps>((props, ref) =>
         });
       }
 
-      // ダンスモデルを読み込む
+      // Load dance model
       const danceGltf = await loader.loadAsync(dancePath);
       danceModelRef.current = danceGltf;
       danceAnimationsRef.current = danceGltf.animations;
 
-      // ダンスアニメーションを処理
+      // Process dance animations
       if (danceAnimationsRef.current.length > 0) {
         processExternalAnimations();
       }
 
       props.onModelLoaded(true);
     } catch (error) {
-      console.error('モデルの読み込みに失敗しました:', error);
-      const errorMessage = error instanceof Error ? error.message : '不明なエラーが発生しました';
+      console.error('Failed to load model:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
       props.onModelLoaded(false, errorMessage);
     } finally {
       isLoading = false;
     }
   };
 
-  // アニメーションループ
+  // Animation loop
   const animate = () => {
     if (!mountRef.current) return;
 
     const delta = clockRef.current.getDelta();
 
-    // ミキサーのアップデート
+    // Update mixer
     if (mixerRef.current) {
       mixerRef.current.update(delta);
     }
 
-    // コントロールのアップデート
+    // Update controls
     if (controlsRef.current) {
       controlsRef.current.update();
     }
 
-    // レンダリング
+    // Rendering
     if (rendererRef.current && sceneRef.current && cameraRef.current) {
       rendererRef.current.render(sceneRef.current, cameraRef.current);
     }
@@ -249,22 +249,22 @@ const ThreeScene = forwardRef<ThreeSceneHandle, ThreeSceneProps>((props, ref) =>
     animationRef.current = requestAnimationFrame(animate);
   };
 
-  // シーンの初期化
+  // Scene initialization
   useEffect(() => {
     if (!mountRef.current || isComponentMounted.current) return;
     isComponentMounted.current = true;
 
-    // シーンの設定
+    // Scene setup
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x000022);
     sceneRef.current = scene;
 
-    // カメラの設定
+    // Camera setup
     const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
     camera.position.set(0, 1.5, 3);
     cameraRef.current = camera;
 
-    // レンダラーの設定
+    // Renderer setup
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
@@ -272,13 +272,13 @@ const ThreeScene = forwardRef<ThreeSceneHandle, ThreeSceneProps>((props, ref) =>
     mountRef.current.appendChild(renderer.domElement);
     rendererRef.current = renderer;
 
-    // コントロールの設定
+    // Controls setup
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.target.set(0, 1.2, 0);
     controls.update();
     controlsRef.current = controls;
 
-    // ライトの設定
+    // Light setup
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
     scene.add(ambientLight);
 
@@ -287,11 +287,11 @@ const ThreeScene = forwardRef<ThreeSceneHandle, ThreeSceneProps>((props, ref) =>
     directionalLight.castShadow = true;
     scene.add(directionalLight);
 
-    // グリッドヘルパー
+    // Grid helper
     const gridHelper = new THREE.GridHelper(10, 10);
     scene.add(gridHelper);
 
-    // 床の作成（リフレクション効果付き）
+    // Floor creation (with reflection effect)
     const floorGeometry = new THREE.CircleGeometry(10, 64);
     const floorMaterial = new THREE.MeshStandardMaterial({
       color: 0x6666aa,
@@ -303,16 +303,16 @@ const ThreeScene = forwardRef<ThreeSceneHandle, ThreeSceneProps>((props, ref) =>
     floor.receiveShadow = true;
     scene.add(floor);
 
-    // 霧の追加
+    // Fog addition
     scene.fog = new THREE.Fog(0x000022, 1, 15);
 
-    // モデルの読み込み
+    // Load models
     loadModels();
 
-    // アニメーションの開始
+    // Animation start
     animate();
 
-    // リサイズハンドラ
+    // Resize handler
     const handleResize = () => {
       if (!cameraRef.current || !rendererRef.current) return;
 
@@ -323,7 +323,7 @@ const ThreeScene = forwardRef<ThreeSceneHandle, ThreeSceneProps>((props, ref) =>
 
     window.addEventListener('resize', handleResize);
 
-    // クリーンアップ
+    // Cleanup
     return () => {
       window.removeEventListener('resize', handleResize);
 
@@ -340,7 +340,7 @@ const ThreeScene = forwardRef<ThreeSceneHandle, ThreeSceneProps>((props, ref) =>
       }
 
       if (sceneRef.current) {
-        // シーンのクリーンアップ
+        // Scene cleanup
         sceneRef.current.traverse((object) => {
           if (object instanceof THREE.Mesh) {
             object.geometry.dispose();
@@ -357,7 +357,7 @@ const ThreeScene = forwardRef<ThreeSceneHandle, ThreeSceneProps>((props, ref) =>
         rendererRef.current.dispose();
       }
 
-      // 音声の停止とクリーンアップ
+      // Audio stop and cleanup
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current.src = '';
@@ -367,28 +367,28 @@ const ThreeScene = forwardRef<ThreeSceneHandle, ThreeSceneProps>((props, ref) =>
     };
   }, []);
 
-  // メソッドの公開
+  // Method exposure
   useImperativeHandle(ref, () => ({
-    // ダンスアニメーションを再生
+    // Play dance animation
     playDanceAnimation: (index: number) => {
-      console.log(`playDanceAnimation(${index})が呼び出されました`);
+      console.log(`playDanceAnimation(${index}) called`);
 
-      // 既存のアニメーションを停止
+      // Stop existing animation
       if (currentActionRef.current) {
         currentActionRef.current.fadeOut(0.5);
         currentActionRef.current.stop();
       }
 
-      // 音楽の再生
+      // Music playback
       if (!audioRef.current) {
         audioRef.current = new Audio(MODEL_PATHS.DANCE_MUSIC);
         audioRef.current.loop = true;
       }
       audioRef.current.play().catch(error => {
-        console.warn('音楽の再生に失敗しました:', error);
+        console.warn('Failed to play music:', error);
       });
 
-      // 指定されたインデックスのダンスアニメーションを再生
+      // Play specified dance animation
       const animationName = `dance_${index}`;
       if (mixerRef.current && actionsRef.current[animationName]) {
         currentActionRef.current = actionsRef.current[animationName];
@@ -396,9 +396,9 @@ const ThreeScene = forwardRef<ThreeSceneHandle, ThreeSceneProps>((props, ref) =>
         currentActionRef.current.fadeIn(0.5);
         currentActionRef.current.play();
         currentActionRef.current.setLoop(THREE.LoopRepeat, Infinity);
-        console.log(`ダンスアニメーション ${index} を再生します`);
+        console.log(`Playing dance animation ${index}`);
       } else {
-        console.warn(`ダンスアニメーション ${animationName} は見つかりません`);
+        console.warn(`Dance animation ${animationName} not found`);
       }
     }
   }));
@@ -414,7 +414,7 @@ const ThreeScene = forwardRef<ThreeSceneHandle, ThreeSceneProps>((props, ref) =>
 
 ThreeScene.displayName = 'ThreeScene';
 
-// Controlsコンポーネント
+// Controls component
 interface ControlsProps {
   onIntergalactiaDance: () => void;
   isModelLoaded: boolean;
@@ -424,7 +424,7 @@ const Controls: React.FC<ControlsProps> = ({
   onIntergalactiaDance,
   isModelLoaded
 }) => {
-  // ボタンの共通クラス
+  // Common button class
   const buttonClass = `
     px-5 py-2.5
     rounded-lg
@@ -450,20 +450,20 @@ const Controls: React.FC<ControlsProps> = ({
         disabled={!isModelLoaded}
         className={`${buttonClass} bg-green-600 hover:bg-green-700 focus:ring-green-500`}
       >
-        ダンスモーション
+        Dance Motion
       </button>
 
       <button
         onClick={handleReset}
         className={`${buttonClass} bg-gray-600 hover:bg-gray-700 focus:ring-gray-500`}
       >
-        リセット
+        Reset
       </button>
     </div>
   );
 };
 
-// ErrorNoticeコンポーネント
+// ErrorNotice component
 interface ErrorNoticeProps {
   isVisible: boolean;
   message?: string;
@@ -474,45 +474,45 @@ const ErrorNotice: React.FC<ErrorNoticeProps> = ({ isVisible, message }) => {
 
   return (
     <div className="absolute top-16 left-5 right-5 bg-red-700/80 p-4 rounded-lg text-white text-sm leading-relaxed max-w-3xl z-10 animate-fade-in backdrop-blur-md shadow-lg">
-      <h3 className="mt-0 text-lg font-bold mb-2 text-pink-100">⚠️ エラーが発生しました</h3>
+      <h3 className="mt-0 text-lg font-bold mb-2 text-pink-100">⚠️ An Error Occurred</h3>
 
       {message ? (
         <p>{message}</p>
       ) : (
         <>
-          <p>このデモを実行するには、以下のGLBファイルが必要です：</p>
+          <p>The following GLB files are required to run this demo:</p>
           <code className="bg-black/30 px-2 py-1 rounded font-mono inline-block m-1">{MODEL_PATHS.CHARACTER}</code>
           <code className="bg-black/30 px-2 py-1 rounded font-mono inline-block m-1">{MODEL_PATHS.DANCE_MOTION}</code>
-          <p>GLBファイルを正しい場所に配置してから、ページを更新してください。</p>
+          <p>Please place the GLB files in the correct location and refresh the page.</p>
         </>
       )}
     </div>
   );
 };
 
-// メインのHomeコンポーネント
+// Main Home component
 const Home = () => {
   const [isModelLoaded, setIsModelLoaded] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  const [loadingStatus, setLoadingStatus] = useState('読み込み中...');
+  const [loadingStatus, setLoadingStatus] = useState('Loading...');
   const threeSceneRef = useRef<ThreeSceneHandle>(null);
   const loadStartTime = useRef<number>(Date.now());
   const isFirstLoad = useRef<boolean>(true);
 
-  // アニメーション関数
+  // Animation function
   const handleIntergalactiaDance = () => {
     if (threeSceneRef.current) {
       threeSceneRef.current.playDanceAnimation(0);
     }
   };
 
-  // モデルロード状態のハンドラー
+  // Model load state handler
   const handleModelLoad = (loaded: boolean, error?: string) => {
-    console.log("モデルロード状態:", { loaded, error });
+    console.log("Model load state:", { loaded, error });
 
-    // すでに一度ロードされている場合は重複処理を避ける
+    // Avoid duplicate processing if already loaded
     if (isModelLoaded && !error && !isFirstLoad.current) {
-      console.log("モデルはすでにロード済みです");
+      console.log("Model is already loaded");
       return;
     }
 
@@ -520,33 +520,33 @@ const Home = () => {
 
     if (error) {
       setErrorMessage(error.includes("Not Found") ?
-        "モデルファイルが見つかりません。GLBファイルを '/public/3d/' に配置してください。" :
+        "Model files not found. Please place GLB files in '/public/3d/'." :
         error
       );
-      setLoadingStatus('モデル読み込みエラー');
+      setLoadingStatus('Model loading error');
     } else {
       const loadTime = Date.now() - loadStartTime.current;
-      console.log(`モデル読み込み完了時間: ${loadTime}ms`);
+      console.log(`Model load completion time: ${loadTime}ms`);
       setIsModelLoaded(loaded);
       setLoadingStatus('');
       setErrorMessage('');
     }
   };
 
-  // モデル読み込みの進行状況を表示
+  // Model load progress display
   useEffect(() => {
     loadStartTime.current = Date.now();
 
     const loadingTimer = setTimeout(() => {
       if (!isModelLoaded && !errorMessage) {
-        setLoadingStatus('読み込み中...(少々お待ちください)');
+        setLoadingStatus('Loading...(please wait)');
       }
     }, 3000);
 
     return () => clearTimeout(loadingTimer);
   }, [isModelLoaded, errorMessage]);
 
-  // インラインスタイル（Tailwindの不具合対策）
+  // Inline styles (Tailwind compatibility workaround)
   const forceStyles = {
     container: {
       position: 'relative' as const,
