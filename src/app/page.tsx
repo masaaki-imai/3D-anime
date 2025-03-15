@@ -496,6 +496,7 @@ const PictureInPictureVideo: React.FC<PiPVideoProps> = ({ isVisible, videoSrc, o
           controls
           autoPlay
           loop
+          muted
           className="w-full"
           preload="auto"
           playsInline
