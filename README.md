@@ -1,4 +1,4 @@
-3d-anime-mu.vercel.app
+https://3d-anime-mu.vercel.app
 
 # 3D Model Demo - Next.js Version
 
