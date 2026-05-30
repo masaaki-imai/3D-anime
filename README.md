@@ -1,3 +1,5 @@
+3d-anime-mu.vercel.app
+
 # 3D Model Demo - Next.js Version
 
 This project is a web application that displays and manipulates 3D models (GLB format) in a web browser. Built with Next.js and TypeScript, it allows you to view 3D models and apply animations.
